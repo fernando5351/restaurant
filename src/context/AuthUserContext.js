@@ -3,11 +3,11 @@ import { Alert } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-export const AuthUserProvider = createContext();
+export const AuthUser = createContext();
 
-export default function AuthUserContext() {
+export const AuthUserContext = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [splasLoading, setAplasLoading] = useState(false);
+    const [splashLoading, setSplashLoading] = useState(false);
     const [userToken, setUserToken] = useState('');
     const url = "https://holistic-screw-production.up.railway.app";
 
@@ -36,13 +36,11 @@ export default function AuthUserContext() {
 
     const login = (data)=>{
         setIsLoading(true)
+        console.log(data);
         axios.post(`${url}/login`,data)
         .then((res)=>{
             let token = res.data;
-            switch (key) {
-                case "No se encontro ningún usuario con el correo espedificado":
-                    Alert.alert("Alerta", "Email no encontrado");
-                    break;
+            switch (token) {
                 case "No se encontro ningún usuario con el correo espedificado":
                     Alert.alert("Alerta", "Email no encontrado");
                     break;
@@ -71,38 +69,45 @@ export default function AuthUserContext() {
         setIsLoading(false)
     }
 
-    const IsLoggedIn = ()=>{
+    const IsLoggedIn = async ()=>{
         try {
-            setAplasLoading(true);
-            let user = AsyncStorage.getItem('UserToken');
+            setSplashLoading(true);
+            let user = await AsyncStorage.getItem('UserToken');
             user = JSON.parse(user);
 
             if (user) {
                 setUserToken(user)
+                console.log(user);
             }
-            setAplasLoading(false);
+            setSplashLoading(false);
         } catch (error) {
-            setAplasLoading(false);
+            setSplashLoading(false);
             console.log(error);
         }
     }
 
+    async function borrar(){
+        const del = await AsyncStorage.removeItem('UserToken');
+        return console.log(del);
+    }
+
     useEffect(() => {
       IsLoggedIn();
+      borrar();
     }, [])
     
   return (
-    <AuthUserProvider.provider
-        value={{
-            userToken,
-            isLoading,
-            splasLoading,
-            register,
-            login,
-            logOut
-        }}
+    <AuthUser.Provider
+       value={{
+        userToken,
+        isLoading,
+        splashLoading,
+        register,
+        login,
+        logOut
+       }}
     >
-        {Children}
-    </AuthUserProvider.provider>
+        {children}
+    </AuthUser.Provider>
   )
 }

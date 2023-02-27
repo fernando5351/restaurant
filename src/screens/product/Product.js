@@ -1,10 +1,10 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function Singup() {
+export default function Product() {
   return (
     <View>
-      <Text>Singup</Text>
+      <Text>Product</Text>
     </View>
   )
 }
