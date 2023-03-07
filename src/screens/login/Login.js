@@ -1,16 +1,13 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Keyboard } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import Loader from "../../components/loading/Loading";
-import {
-  isEmailValid
-} from "../../utils/Methods";
 import { useFormik } from 'formik';
 import * as Yup from "yup"; 
 import { AuthUser } from '../../context/AuthUserContext';
 
-export default function App({ navigation }) {
+export default function Login({ navigation }) {
   const { isLoading, login } = useContext(AuthUser);
 
   const yupSchema = {
@@ -32,8 +29,8 @@ export default function App({ navigation }) {
   return (
     <View style={styles.container}>
       <Loader visible={isLoading} />
-      <Text style={styles.titulo}>Hello</Text>
-      <Text >Sign In to your account</Text>
+      <Text style={styles.titulo}>Bienvenido</Text>
+      <Text >Inicia sesion en tu cuenta</Text>
       <Text style={styles.error}>{formik.errors.email}</Text>
       <TextInput
         placeholder="jhon@email.com"
@@ -49,7 +46,6 @@ export default function App({ navigation }) {
         onChangeText={(text)=> formik.setFieldValue('password', text)}
         secureTextEntry
       />
-      <Text style={styles.forgotPassword}>olvidaste tu contraseña?</Text>
       <TouchableOpacity style={styles.containerBtn} onPress={formik.handleSubmit}>
         <LinearGradient
           // Button Linear Gradient
@@ -61,7 +57,9 @@ export default function App({ navigation }) {
           <Text style={styles.text}>Iniciar sesion</Text>
         </LinearGradient>
       </TouchableOpacity>
-      <Text style={styles.forgotPassword}>no tienes cuenta?</Text>
+      <TouchableOpacity onPress={()=>navigation.navigate('singup')}>
+          <Text style={styles.forgotPassword}>No tienes cuenta?, ¡Registrate!</Text>
+      </TouchableOpacity>
       <StatusBar style="auto" />
     </View>
   )
@@ -75,7 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   titulo: {
-    fontSize: 80,
+    fontSize: 65,
     color: '#34434D',
     fontWeight: 'bold',
   },

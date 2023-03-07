@@ -1,24 +1,41 @@
 import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {Product} from '../../components/data/Product';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 export default function Home() {
-  const [products, setProducts] = useState(Product);
+  const [products, setProducts] = useState([]);
   const navigation = useNavigation();
+
+  function getProducts() {
+    axios.get('https://storeonline-production.up.railway.app/api/v1/pastel')
+      .then(response => {
+        const data = response.data;
+        setProducts(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+
+  useEffect(() => {
+    getProducts();
+  }, [])
   return (
     <View style={style.container}>
       {
         products.map((pro, index) => (
           <TouchableOpacity key={index}
             onPress={()=>{
-              navigation.navigate("product")
+              navigation.navigate("product", {productId: pro.id})
             }}
           >
             <View style={style.product}>
-              <Image source={{ uri: pro.img }} style={style.image} />
-              <Text style={style.name}>{pro.name}</Text>
-              <Text style={style.price}>{pro.price}</Text>
+              <Image source={{ uri: pro.imgurl }} style={style.image} />
+              <Text style={style.name}>{pro.namePastel}</Text>
+              <Text style={style.price}>${pro.price}</Text>
             </View>
           </TouchableOpacity>
         ))
@@ -40,12 +57,12 @@ const style = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'gray',
     width: 185,
-    height: 220,
+    height: 270,
     margin: 10
   },
   image: {
     width: '100%',
-    height: '75%',
+    height: '70%',
     borderRadius: 25,
   },
   name: {
