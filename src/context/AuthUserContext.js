@@ -18,7 +18,7 @@ export const AuthUserContext = ({ children }) => {
                 setIsLoading(false);
                 const token = res.data;
                 setUserToken(token);
-                console.log(token, ' => async storage');
+                console.log(JSON.stringify(userToken, null, 2))
                 AsyncStorage.setItem('UserToken', JSON.stringify(token));
             })
             .catch((error) => {
@@ -42,7 +42,6 @@ export const AuthUserContext = ({ children }) => {
                 if (Array.isArray(response)) {
                     const token = response;
                     setUserToken(token);
-                    console.log(token, ' => async storage');
                     AsyncStorage.setItem('UserToken', JSON.stringify(token));
                 }
                 // Si la respuesta es un objeto con un atributo "output"
@@ -83,10 +82,8 @@ export const AuthUserContext = ({ children }) => {
             setSplashLoading(true);
             let user = await AsyncStorage.getItem('UserToken');
             user = JSON.parse(user);
-            console.log(user);
             if (user) {
-                setUserToken(user)
-                console.log(user);
+                setUserToken(user);
             }
             setSplashLoading(false);
         } catch (error) {

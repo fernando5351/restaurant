@@ -16,7 +16,8 @@ export default function Signup({ navigation }) {
     direction: Yup.string().required("La direccion es obligatoria"),
     age: Yup.number().required("La edad es obligatoria"),
     email: Yup.string().email("correo invalido").required("El correro es obligatorio"),
-    password: Yup.string().required("La contraseña es obligatoria")
+    password: Yup.string().required("La contraseña es obligatoria"),
+    cellphone: Yup.string().required("El numero de telefono es necesario")
   };
   const formik = useFormik({
     initialValues: {
@@ -25,7 +26,8 @@ export default function Signup({ navigation }) {
       direction: "",
       age: "",
       email: "",
-      password: ""
+      password: "",
+      cellphone: ""
     },
     validationSchema: Yup.object(yupSchema),
     validateOnChange: false,
@@ -69,6 +71,13 @@ export default function Signup({ navigation }) {
           style={styles.textInput}
           value={formik.values.age.trim()}
           onChangeText={(text) => formik.setFieldValue('age', text)}
+        />
+        <Text style={styles.error}>{formik.errors.cellphone}</Text>
+        <TextInput
+          placeholder="7878 7590"
+          style={styles.textInput}
+          value={formik.values.cellphone.trim()}
+          onChangeText={(text) => formik.setFieldValue('cellphone', text)}
         />
         <Text style={styles.error}>{formik.errors.email}</Text>
         <TextInput

@@ -1,6 +1,5 @@
 import { StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import {Product} from '../../components/data/Product';
+import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 

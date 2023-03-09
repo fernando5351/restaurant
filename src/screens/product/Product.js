@@ -1,20 +1,27 @@
 import { StyleSheet, ScrollView, View, Image, Text, TextInput, TouchableOpacity, Modal, TouchableWithoutFeedback, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { CheckBox } from 'react-native-elements';
 import axios from 'axios';
+import { useFormik } from 'formik';
+import * as Yup from "yup"; 
 import { useRoute } from '@react-navigation/native';
+import { AuthUser } from "../../context/AuthUserContext";
 
 
 export default function Products() {
   const route = useRoute();
   const { productId } = route.params;
-  const [product, setProduct] = useState([])
+  const { userToken } = useContext(AuthUser);
+  const idUser = userToken.id;
+
+  const [product, setProduct] = useState([]);
+  const yupSchema = {
+    mensaje: Yup.string().required("El Mensaje es requerido"),
+    pets: Yup.string().required("El nombre de la mascota es requerido")
+  }
 
   const [colors, setColors] = useState([]);
   const [checkboxes, setCheckboxes] = useState([]);
-
-  const [size, setSize] = useState([]);
-  const [checkboxSize, setCheckboxSize] = useState([]);
 
   const [sabores, setSabores] = useState([]);
   const [checkboxSabor, setCheckboxSabor] = useState([]);
@@ -23,12 +30,12 @@ export default function Products() {
   const [checkboxDecorations, setCheckboxDecorations] = useState([]);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalTamañoVisible, setModalTamañoVisible] = useState(false);
   const [modalSaborVisible, setModalSaborVisible] = useState(false);
   const [modalDecoracionVisible, setModalDecoracionVisible] = useState(false);
 
+  const url = 'https://storeonline-production.up.railway.app/api/v1';
   function getProducts() {
-    axios.get('https://storeonline-production.up.railway.app/api/v1/pastel')
+    axios.get(`${url}/pastel`)
       .then(response => {
         const data = response.data;
         const prod = data.filter((p) => p.id === productId);
@@ -40,7 +47,7 @@ export default function Products() {
   }
 
   function getColors() {
-    axios.get('https://storeonline-production.up.railway.app/api/v1/colors')
+    axios.get(`${url}/colors`)
       .then(response => {
         setColors(response.data);
         setCheckboxes(response.data.map(() => false));
@@ -56,29 +63,12 @@ export default function Products() {
     setCheckboxes(newCheckboxes);
   };
 
-  function getSize() {
-    axios.get('https://storeonline-production.up.railway.app/api/v1/size')
-      .then(response => {
-        setSize(response.data);
-        setCheckboxSize(response.data.map(() => false));
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }
-
-  const handleCheckboxChangeSize = (index) => {
-    const newCheckboxes = [...checkboxSize];
-    newCheckboxes[index] = !newCheckboxes[index];
-    setCheckboxSize(newCheckboxes);
-  };
 
   function getSbores() {
-    axios.get('https://storeonline-production.up.railway.app/api/v1/flavor')
+    axios.get(`${url}/flavor`)
       .then(response => {
         setSabores(response.data);
-        setCheckboxSize(response.data.map(() => false));
-        console.log(response.data);
+        setCheckboxSabor(response.data.map(() => false));
       })
       .catch(error => {
         console.error(error);
@@ -96,7 +86,6 @@ export default function Products() {
       .then(response => {
         setDecorations(response.data);
         setCheckboxDecorations(response.data.map(() => false));
-        console.log(response.data);
       })
       .catch(error => {
         console.error(error);
@@ -112,82 +101,141 @@ export default function Products() {
   useEffect(() => {
     getProducts();
     getColors();
-    getSize();
     getSbores();
     getDecorations();
   }, [])
 
-  function submitForm() {
-    const data = [];
-    const selectedDecorations = [];
-    const selectedColores = [];
-    const selectedSize = [];
-    const selectedSabores = [];
-  
+  const pedido = [];
+  const data = [];
+  const selectedDecorations = [];
+  const selectedColores = [];
+  const selectedSabores = [];
+
+  function checkbox() {
     //decoraciones
     for (let i = 0; i < checkboxDecorations.length; i++) {
       if (checkboxDecorations[i]) {
         selectedDecorations.push(decorations[i]);
-        console.log(selectedDecorations);
+        data.push({ idDecoration: decorations[i].id });
       }
     }
-  
+
     if (selectedDecorations.length > 1) {
       Alert.alert('Solo se puede seleccionar una decoracion como máximo.')
       setCheckboxDecorations([]);
     }
 
     //colores
+    let idColor1 = null;
+    let idColor2 = null;
+
     for (let i = 0; i < checkboxes.length; i++) {
       if (checkboxes[i]) {
+        if (idColor1 === null) {
+          idColor1 = colors[i].id;
+        } else if (idColor2 === null) {
+          idColor2 = colors[i].id;
+        }
         selectedColores.push(colors[i]);
-        console.log(selectedColores);
+        if (idColor1 !== null && idColor2 !== null) {
+          data.push({ idColor1: idColor1, idColor2: idColor2 });
+        }
       }
     }
-  
+
+
     if (selectedColores.length > 2) {
       Alert.alert('Solo se pueden seleccionar dos colores como máximo.');
       setCheckboxes([]);
     }
 
-    //tamaños
-    for (let i = 0; i < checkboxSize.length; i++) {
-      if (checkboxSize[i]) {
-        selectedSize.push(size[i]);
-        console.log(selectedSize);
-      }
-    }
-  
-    if (selectedSize.length > 1) {
-      Alert.alert('Solo se puede seleccionar una decoracion como máximo.')
-      setCheckboxSize([]);
-    }
-
     //sabores
+    let idFlavor1 = null;
+    let idFlavor2 = null;
+
     for (let i = 0; i < checkboxSabor.length; i++) {
       if (checkboxSabor[i]) {
+        if (idFlavor1 === null) {
+          idFlavor1 = sabores[i].id;
+        } else if (idFlavor2 === null) {
+          idFlavor2 = sabores[i].id;
+        }
         selectedSabores.push(sabores[i]);
-        console.log(selectedSabores);
+        if (idFlavor1 !== null && idFlavor2 !== null) {
+          data.push({ idFlavor1: idFlavor1, idFlavor2: idFlavor2 });
+        }
       }
     }
-  
+
     if (selectedSabores.length > 2) {
       Alert.alert('Solo se pueden seleccionar dos sabores como máximo.')
       setCheckboxSabor([]);
     }
 
-    /*axios.post('https://storeonline-production.up.railway.app/api/v1/order', {
-      decorations: selectedDecorations
-    })
-    .then(response => {
-      // Manejar la respuesta de la API
-    })
-    .catch(error => {
-      console.error(error.data);
-    });
-    */
+
+    pedido.push(data);
   }
-  submitForm();
+
+  checkbox();
+
+  function Shop() {
+    pedido.push({ idUser: idUser });
+    pedido.push({ idPastel: productId });
+    const shop = pedido.flat(1);
+
+    const cart = shop.reduce((acc, cur) => {
+      Object.keys(cur).forEach(key => {
+        acc[key] = cur[key];
+      });
+      return acc;
+    }, {});
+
+    if (selectedSabores.length == 0) {
+      Alert.alert('Debes seleccionar los sabores deseados!.')
+    } if (selectedSabores.length == 1) {
+      Alert.alert('Debes seleccionar dos sabores deseados!.')
+    } if (selectedColores.length == 0) {
+      Alert.alert('Debes seleccionar los colores deseados!.')
+    } if (selectedColores.length == 1) {
+      Alert.alert('Debes seleccionar dos colores deseados!.')
+    } if (selectedDecorations.length == 0) {
+      Alert.alert('Debes seleccionar la decoración deseada!.')
+    } if (selectedColores.length == 2 && selectedDecorations.length == 1 && selectedSabores.length == 2) {
+      axios.post(`${url}/shopping`, cart)
+        .then((res) => {
+          if (res) {
+            Alert.alert("Pedido realizado con exito!!");
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  }
+
+  function onChangeMessage(event){
+    console.log(event.target)
+    setMessage(
+     event.target.value
+    )
+  }
+
+  const formik = useFormik({
+    initialValues: {
+      pets: '',
+      mensaje: '',
+      author: userToken.name
+    },
+    validationSchema: Yup.object(yupSchema),
+    validateOnChange: false,
+    onSubmit: data => {
+      console.log(data);
+      // axios.post(`${url}/comments`, data)
+      // .then((res)=>{
+      //   console.log(res);
+      // })
+    }
+  })
 
   return (
     <ScrollView>
@@ -203,8 +251,10 @@ export default function Products() {
                   <Text style={style.textName}>{item.namePastel}</Text>
                   <Text style={style.text}>${item.price}</Text>
                 </View>
-                <TouchableOpacity style={style.cart}>
-                  <Text style={style.comprar}>Comprar</Text>
+                <TouchableOpacity onPress={() => {
+                  Shop()
+                }} style={style.cart}>
+                  <Text style={style.comprar}>Carrito</Text>
                 </TouchableOpacity>
               </View>
               <View style={style.containerDes}>
@@ -215,7 +265,7 @@ export default function Products() {
         }
 
         {/*modal colores*/}
-        <TouchableOpacity style={style.button} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={style.buttonCheck} onPress={() => setModalVisible(true)}>
           <Text style={style.buttonText}>Colores</Text>
         </TouchableOpacity>
         <Modal
@@ -244,7 +294,7 @@ export default function Products() {
                     style={style.closeButton}
                     onPress={() => setModalVisible(false)}
                   >
-                    <Text style={style.closeButtonText}>Close</Text>
+                    <Text style={style.closeButtonText}>Cerrar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -252,7 +302,7 @@ export default function Products() {
           </TouchableWithoutFeedback>
         </Modal>
         {/*Modal tamaño*/}
-        <TouchableOpacity style={style.button} onPress={() => setModalTamañoVisible(true)}>
+        {/* <TouchableOpacity style={style.button} onPress={() => setModalTamañoVisible(true)}>
           <Text style={style.buttonText}>Tamaños</Text>
         </TouchableOpacity>
         <Modal
@@ -266,7 +316,7 @@ export default function Products() {
               <View style={style.modal}>
                 <View style={style.modalContent}>
                   <View style={style.checkbox}>
-                  {
+                    {
                       size.map((size, index) => (
                         <CheckBox
                           key={index}
@@ -287,9 +337,9 @@ export default function Products() {
               </View>
             </View>
           </TouchableWithoutFeedback>
-        </Modal>
+        </Modal> */}
         {/*Modal Sabor*/}
-        <TouchableOpacity style={style.button} onPress={() => setModalSaborVisible(true)}>
+        <TouchableOpacity style={style.buttonCheck} onPress={() => setModalSaborVisible(true)}>
           <Text style={style.buttonText}>Sabores</Text>
         </TouchableOpacity>
         <Modal
@@ -303,7 +353,7 @@ export default function Products() {
               <View style={style.modal}>
                 <View style={style.modalContent}>
                   <View style={style.checkbox}>
-                  {
+                    {
                       sabores.map((flavor, index) => (
                         <CheckBox
                           key={index}
@@ -318,7 +368,7 @@ export default function Products() {
                     style={style.closeButton}
                     onPress={() => setModaSaborVisible(false)}
                   >
-                    <Text style={style.closeButtonText}>Close</Text>
+                    <Text style={style.closeButtonText}>Cerrar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -326,7 +376,7 @@ export default function Products() {
           </TouchableWithoutFeedback>
         </Modal>
         {/*Modal Decoracion*/}
-        <TouchableOpacity style={style.button} onPress={() => setModalDecoracionVisible(true)}>
+        <TouchableOpacity style={style.buttonCheck} onPress={() => setModalDecoracionVisible(true)}>
           <Text style={style.buttonText}>Decoraciones</Text>
         </TouchableOpacity>
         <Modal
@@ -340,7 +390,7 @@ export default function Products() {
               <View style={style.modal}>
                 <View style={style.modalContent}>
                   <View style={style.checkbox}>
-                  {
+                    {
                       decorations.map((decoration, index) => (
                         <CheckBox
                           key={index}
@@ -355,7 +405,7 @@ export default function Products() {
                     style={style.closeButton}
                     onPress={() => setModalDecoracionVisible(false)}
                   >
-                    <Text style={style.closeButtonText}>Close</Text>
+                    <Text style={style.closeButtonText}>Cerrar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -363,17 +413,27 @@ export default function Products() {
           </TouchableWithoutFeedback>
         </Modal>
         {/*comentarios*/}
-        <View style={style.comentariosContainer}>
-          <View style={style.comentariosAling}>
+        <View style={style.inputContainer}>
+          <Text style={style.comentariosTitle}>Comentarios</Text>
+          <View style={style.containerPet}>
             <TextInput
-              placeholder='Nombre de la Mascota'
-              style={style.comentarios}
-            />
-            <TextInput
-              placeholder='Comentarios'
-              style={style.comentarios}
+              style={style.inputPet}
+              placeholder="Escribe el nombre de tu mascota"
+              value={formik.values.pets}
+              onChangeText={(text)=> formik.setFieldValue('pets', text)}
             />
           </View>
+          <View style={style.containerPet}>
+            <TextInput
+              style={style.input}
+              placeholder="Escribe tu comentario"
+              value={formik.values.mensaje}
+              onChangeText={(text) => formik.setFieldValue('mensaje', text)}
+            />
+          </View>
+          <TouchableOpacity style={style.button} onPress={formik.handleSubmit}>
+            <Text style={style.buttonText}>Enviar</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -396,7 +456,6 @@ const style = StyleSheet.create({
     width: '90%',
     height: '100%',
     borderRadius: 25,
-    backgroundColor: 'red'
   },
   containerData: {
     flexDirection: 'row',
@@ -445,7 +504,7 @@ const style = StyleSheet.create({
     fontSize: 15,
     fontWeight: '300'
   },
-  button: {
+  buttonCheck: {
     backgroundColor: '#34434D',
     padding: 10,
     margin: 8,
@@ -504,5 +563,49 @@ const style = StyleSheet.create({
     height: 55,
     borderRadius: 25,
     margin: 4
-  }
+  },
+  comentariosTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    width: "100%",
+    textAlign: 'center',
+    margin: 15
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: 410,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  containerPet: {
+    width: 350,
+    height: 50,
+    margin: 4
+  },
+  inputPet: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+  },
+  button: {
+    backgroundColor: '#00bcd4',
+    borderRadius: 10,
+    padding: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 })
