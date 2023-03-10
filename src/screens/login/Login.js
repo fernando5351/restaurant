@@ -35,7 +35,7 @@ export default function Login({ navigation }) {
       <TextInput
         placeholder="jhon@email.com"
         style={styles.textInput}
-        value={formik.values.email}
+        value={formik.values.email.trim()}
         onChangeText={(text)=> formik.setFieldValue('email', text)}
       />
       <Text style={styles.error}>{formik.errors.password}</Text>

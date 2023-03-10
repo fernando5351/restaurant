@@ -9,16 +9,18 @@ export const AuthUserContext = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [splashLoading, setSplashLoading] = useState(false);
     const [userToken, setUserToken] = useState('');
+    const [tokenUser, setTokenUser] = useState('');
     const url = "https://storeonline-production.up.railway.app/api/v1/users";
 
+    // const token = [];
     const register = (data) => {
         setIsLoading(true);
         axios.post(`${url}`, data)
             .then((res) => {
                 setIsLoading(false);
-                const token = res.data;
+                const token = [];
+                token.push(res.data);
                 setUserToken(token);
-                console.log(JSON.stringify(userToken, null, 2))
                 AsyncStorage.setItem('UserToken', JSON.stringify(token));
             })
             .catch((error) => {
@@ -74,6 +76,7 @@ export const AuthUserContext = ({ children }) => {
         setIsLoading(true);
         AsyncStorage.removeItem('UserToken');
         setUserToken('');
+        // token = [];
         setIsLoading(false)
     }
 
@@ -84,6 +87,7 @@ export const AuthUserContext = ({ children }) => {
             user = JSON.parse(user);
             if (user) {
                 setUserToken(user);
+                setTokenUser(user);
             }
             setSplashLoading(false);
         } catch (error) {
@@ -91,12 +95,6 @@ export const AuthUserContext = ({ children }) => {
             console.log(error);
         }
     }
-
-    async function borrar() {
-        const del = await AsyncStorage.removeItem('UserToken');
-        return console.log(del);
-    }
-
 
     useEffect(() => {
         IsLoggedIn();
@@ -106,6 +104,7 @@ export const AuthUserContext = ({ children }) => {
         <AuthUser.Provider
             value={{
                 userToken,
+                tokenUser,
                 isLoading,
                 splashLoading,
                 register,

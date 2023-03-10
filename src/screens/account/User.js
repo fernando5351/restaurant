@@ -4,10 +4,9 @@ import UserCircle from "../../../assets/icons/profile/usercircle.png";
 import { AuthUser } from '../../context/AuthUserContext'
 
 export default function User() {
-    const { userToken } = useContext(AuthUser);
+    const { userToken, tokenUser } = useContext(AuthUser);
     const user = [];
-    user.push(userToken)
-    console.log(user, "=> usuario");
+    user.push(userToken || tokenUser)
 
     return (
         <View style={style.container}>
@@ -20,27 +19,27 @@ export default function User() {
                         <Text style={style.myAccount}>MI CUENTA</Text>
                         <View style={style.containerText}>
                             <Text style={style.text}>Nombres:</Text>
-                            <Text style={style.textData}> {user.name}</Text>
+                            <Text style={style.textData}> {user[0].name}</Text>
                         </View>
                         <View style={style.containerText}>
                             <Text style={style.text}>Apellidos:</Text>
-                            <Text style={style.textData}> {user.lastname}</Text>
+                            <Text style={style.textData}> { user[0].lastname}</Text>
                         </View>
                         <View style={style.containerText}>
                             <Text style={style.text}>Direccion:</Text>
-                            <Text style={style.textData}> {user.direction}</Text>
+                            <Text style={style.textData}> {user[0].direction}</Text>
                         </View>
                         <View style={style.containerText}>
                             <Text style={style.text}>Edad:</Text>
-                            <Text style={style.textData}> {user.age}</Text>
+                            <Text style={style.textData}> {user[0].age}</Text>
                         </View>
                         <View style={style.containerText}>
                             <Text style={style.text}>Numero tel:</Text>
-                            <Text style={style.textData}> {user.cellphone}</Text>
+                            <Text style={style.textData}> {user[0].cellphone}</Text>
                         </View>
                         <View style={style.containerText}>
                             <Text style={style.text}>Correo:</Text>
-                            <Text style={style.textData}> {user.email}</Text>
+                            <Text style={style.textData}> {user[0].email}</Text>
                         </View>
                     </View>
                 ))

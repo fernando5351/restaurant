@@ -14,7 +14,7 @@ export default function Signup({ navigation }) {
     name: Yup.string().required("El nombre es obligatorio"),
     lastname: Yup.string().required("Los apellidos son obligatorios"),
     direction: Yup.string().required("La direccion es obligatoria"),
-    age: Yup.number().required("La edad es obligatoria"),
+    age: Yup.number().min(18, "Solo pueden registrarse personas mayores de edad").required("La edad es obligatoria"),
     email: Yup.string().email("correo invalido").required("El correro es obligatorio"),
     password: Yup.string().required("La contraseña es obligatoria"),
     cellphone: Yup.string().required("El numero de telefono es necesario")
@@ -32,7 +32,6 @@ export default function Signup({ navigation }) {
     validationSchema: Yup.object(yupSchema),
     validateOnChange: false,
     onSubmit: data => {
-      console.log(JSON.stringify(data, null, 2))
       register(data)
     },
   })

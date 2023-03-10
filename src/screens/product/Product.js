@@ -1,27 +1,30 @@
-import { StyleSheet, ScrollView, View, Image, Text, TextInput, TouchableOpacity, Modal, TouchableWithoutFeedback, Alert } from 'react-native';
+import { StyleSheet, ScrollView, View, Image, Text, TextInput, TouchableOpacity, Modal, TouchableWithoutFeedback, Alert, FlatList } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import { CheckBox } from 'react-native-elements';
 import axios from 'axios';
 import { useFormik } from 'formik';
-import * as Yup from "yup"; 
+import * as Yup from "yup";
 import { useRoute } from '@react-navigation/native';
 import { AuthUser } from "../../context/AuthUserContext";
+import Loader from "../../components/loading/Loading"
 
 
 export default function Products() {
   const route = useRoute();
   const { productId } = route.params;
   const { userToken } = useContext(AuthUser);
-  const idUser = userToken.id;
+  const idUser = userToken[0].id;
 
   const [product, setProduct] = useState([]);
   const yupSchema = {
-    mensaje: Yup.string().required("El Mensaje es requerido"),
+    comment: Yup.string().required("El Mensaje es requerido"),
     pets: Yup.string().required("El nombre de la mascota es requerido")
   }
 
+  const [comments, setComments] = useState([]);
   const [colors, setColors] = useState([]);
   const [checkboxes, setCheckboxes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false)
 
   const [sabores, setSabores] = useState([]);
   const [checkboxSabor, setCheckboxSabor] = useState([]);
@@ -103,6 +106,7 @@ export default function Products() {
     getColors();
     getSbores();
     getDecorations();
+    fetchData();
   }, [])
 
   const pedido = [];
@@ -213,234 +217,225 @@ export default function Products() {
     }
   }
 
-  function onChangeMessage(event){
-    console.log(event.target)
-    setMessage(
-     event.target.value
-    )
-  }
-
   const formik = useFormik({
     initialValues: {
-      pets: '',
-      mensaje: '',
+      pets: "",
+      comment: "",
       author: userToken.name
     },
     validationSchema: Yup.object(yupSchema),
     validateOnChange: false,
     onSubmit: data => {
-      console.log(data);
-      // axios.post(`${url}/comments`, data)
-      // .then((res)=>{
-      //   console.log(res);
-      // })
-    }
+      setIsLoading(true);
+      axios.post(`${url}/comments`, data)
+        .then((res) => {
+          formik.resetForm();
+          setComments(prevComments => [...prevComments, res.data]);
+          setIsLoading(false);
+          //coment
+        })
+    },
   })
 
-  return (
-    <ScrollView>
-      <View style={style.container}>
-        {
-          product.map((item) => (
-            <View style={style.container} key={item.id}>
-              <View style={style.containerImage}>
-                <Image source={{ uri: item.imgurl }} style={style.image} />
-              </View>
-              <View style={style.containerData}>
-                <View style={style.containerText}>
-                  <Text style={style.textName}>{item.namePastel}</Text>
-                  <Text style={style.text}>${item.price}</Text>
-                </View>
-                <TouchableOpacity onPress={() => {
-                  Shop()
-                }} style={style.cart}>
-                  <Text style={style.comprar}>Carrito</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={style.containerDes}>
-                <Text style={style.textDes}>{item.description}</Text>
-              </View>
-            </View>
-          ))
-        }
+  async function fetchData() {
+    const response = await fetch("https://storeonline-production.up.railway.app/api/v1/comments");
+    const data = await response.json();
+    setComments(data);
+  }
 
-        {/*modal colores*/}
-        <TouchableOpacity style={style.buttonCheck} onPress={() => setModalVisible(true)}>
-          <Text style={style.buttonText}>Colores</Text>
-        </TouchableOpacity>
-        <Modal
-          visible={modalVisible}
-          animationType='slide'
-          transparent={true}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-            <View style={style.modalOverlay}>
-              <View style={style.modal}>
-                <View style={style.modalContent}>
-                  <View style={style.checkbox}>
-                    {
-                      colors.map((color, index) => (
-                        <CheckBox
-                          key={index}
-                          title={color.nameColor}
-                          checked={checkboxes[index]}
-                          onPress={() => handleCheckboxChange(index)}
-                        />
-                      ))
-                    }
+  return (
+    <View>
+      <ScrollView>
+        <Loader visible={isLoading} />
+        <View style={style.container}>
+          {
+            product.map((item) => (
+              <View style={style.container} key={item.id}>
+                <View style={style.containerImage}>
+                  <Image source={{ uri: item.imgurl }} style={style.image} />
+                </View>
+                <View style={style.containerData}>
+                  <View style={style.containerText}>
+                    <Text style={style.textName}>{item.namePastel}</Text>
+                    <Text style={style.textPrice}>${item.price}</Text>
                   </View>
-                  <TouchableOpacity
-                    style={style.closeButton}
-                    onPress={() => setModalVisible(false)}
-                  >
-                    <Text style={style.closeButtonText}>Cerrar</Text>
+                  <TouchableOpacity onPress={() => {
+                    Shop()
+                  }} style={style.cart}>
+                    <Text style={style.comprar}>Carrito</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        {/*Modal tamaño*/}
-        {/* <TouchableOpacity style={style.button} onPress={() => setModalTamañoVisible(true)}>
-          <Text style={style.buttonText}>Tamaños</Text>
-        </TouchableOpacity>
-        <Modal
-          visible={modalTamañoVisible}
-          animationType='slide'
-          transparent={true}
-          onRequestClose={() => setModalTamañoVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalTamañoVisible(false)}>
-            <View style={style.modalOverlay}>
-              <View style={style.modal}>
-                <View style={style.modalContent}>
-                  <View style={style.checkbox}>
-                    {
-                      size.map((size, index) => (
-                        <CheckBox
-                          key={index}
-                          title={size.nameSize}
-                          checked={checkboxSize[index]}
-                          onPress={() => handleCheckboxChangeSize(index)}
-                        />
-                      ))
-                    }
-                  </View>
-                  <TouchableOpacity
-                    style={style.closeButton}
-                    onPress={() => setModaTamañolVisible(false)}
-                  >
-                    <Text style={style.closeButtonText}>Close</Text>
-                  </TouchableOpacity>
+                <View style={style.containerDes}>
+                  <Text style={style.textDes}>{item.description}</Text>
                 </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal> */}
-        {/*Modal Sabor*/}
-        <TouchableOpacity style={style.buttonCheck} onPress={() => setModalSaborVisible(true)}>
-          <Text style={style.buttonText}>Sabores</Text>
-        </TouchableOpacity>
-        <Modal
-          visible={modalSaborVisible}
-          animationType='slide'
-          transparent={true}
-          onRequestClose={() => setModalSaborVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalSaborVisible(false)}>
-            <View style={style.modalOverlay}>
-              <View style={style.modal}>
-                <View style={style.modalContent}>
-                  <View style={style.checkbox}>
-                    {
-                      sabores.map((flavor, index) => (
-                        <CheckBox
-                          key={index}
-                          title={flavor.nameFlavor}
-                          checked={checkboxSabor[index]}
-                          onPress={() => handleCheckboxChangeSabores(index)}
-                        />
-                      ))
-                    }
-                  </View>
-                  <TouchableOpacity
-                    style={style.closeButton}
-                    onPress={() => setModaSaborVisible(false)}
-                  >
-                    <Text style={style.closeButtonText}>Cerrar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        {/*Modal Decoracion*/}
-        <TouchableOpacity style={style.buttonCheck} onPress={() => setModalDecoracionVisible(true)}>
-          <Text style={style.buttonText}>Decoraciones</Text>
-        </TouchableOpacity>
-        <Modal
-          visible={modalDecoracionVisible}
-          animationType='slide'
-          transparent={true}
-          onRequestClose={() => setModalDecoracionVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalDecoracionVisible(false)}>
-            <View style={style.modalOverlay}>
-              <View style={style.modal}>
-                <View style={style.modalContent}>
-                  <View style={style.checkbox}>
-                    {
-                      decorations.map((decoration, index) => (
-                        <CheckBox
-                          key={index}
-                          title={decoration.nameDecoration}
-                          checked={checkboxDecorations[index]}
-                          onPress={() => handleCheckboxChangeDecorations(index)}
-                        />
-                      ))
-                    }
-                  </View>
-                  <TouchableOpacity
-                    style={style.closeButton}
-                    onPress={() => setModalDecoracionVisible(false)}
-                  >
-                    <Text style={style.closeButtonText}>Cerrar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        {/*comentarios*/}
-        <View style={style.inputContainer}>
-          <Text style={style.comentariosTitle}>Comentarios</Text>
-          <View style={style.containerPet}>
-            <TextInput
-              style={style.inputPet}
-              placeholder="Escribe el nombre de tu mascota"
-              value={formik.values.pets}
-              onChangeText={(text)=> formik.setFieldValue('pets', text)}
-            />
-          </View>
-          <View style={style.containerPet}>
-            <TextInput
-              style={style.input}
-              placeholder="Escribe tu comentario"
-              value={formik.values.mensaje}
-              onChangeText={(text) => formik.setFieldValue('mensaje', text)}
-            />
-          </View>
-          <TouchableOpacity style={style.button} onPress={formik.handleSubmit}>
-            <Text style={style.buttonText}>Enviar</Text>
+            ))
+          }
+
+          {/*modal colores*/}
+          <TouchableOpacity style={style.buttonCheck} onPress={() => setModalVisible(true)}>
+            <Text style={style.buttonText}>Colores</Text>
           </TouchableOpacity>
+          <Modal
+            visible={modalVisible}
+            animationType='slide'
+            transparent={true}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+              <View style={style.modalOverlay}>
+                <View style={style.modal}>
+                  <View style={style.modalContent}>
+                    <View style={style.checkbox}>
+                      {
+                        colors.map((color, index) => (
+                          <CheckBox
+                            key={index}
+                            title={color.nameColor}
+                            checked={checkboxes[index]}
+                            onPress={() => handleCheckboxChange(index)}
+                          />
+                        ))
+                      }
+                    </View>
+                    <TouchableOpacity
+                      style={style.closeButton}
+                      onPress={() => setModalVisible(false)}
+                    >
+                      <Text style={style.closeButtonText}>Cerrar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+          {/*Modal Sabor*/}
+          <TouchableOpacity style={style.buttonCheck} onPress={() => setModalSaborVisible(true)}>
+            <Text style={style.buttonText}>Sabores</Text>
+          </TouchableOpacity>
+          <Modal
+            visible={modalSaborVisible}
+            animationType='slide'
+            transparent={true}
+            onRequestClose={() => setModalSaborVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setModalSaborVisible(false)}>
+              <View style={style.modalOverlay}>
+                <View style={style.modal}>
+                  <View style={style.modalContent}>
+                    <View style={style.checkbox}>
+                      {
+                        sabores.map((flavor, index) => (
+                          <CheckBox
+                            key={index}
+                            title={flavor.nameFlavor}
+                            checked={checkboxSabor[index]}
+                            onPress={() => handleCheckboxChangeSabores(index)}
+                          />
+                        ))
+                      }
+                    </View>
+                    <TouchableOpacity
+                      style={style.closeButton}
+                      onPress={() => setModaSaborVisible(false)}
+                    >
+                      <Text style={style.closeButtonText}>Cerrar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+          {/*Modal Decoracion*/}
+          <TouchableOpacity style={style.buttonCheck} onPress={() => setModalDecoracionVisible(true)}>
+            <Text style={style.buttonText}>Decoraciones</Text>
+          </TouchableOpacity>
+          <Modal
+            visible={modalDecoracionVisible}
+            animationType='slide'
+            transparent={true}
+            onRequestClose={() => setModalDecoracionVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setModalDecoracionVisible(false)}>
+              <View style={style.modalOverlay}>
+                <View style={style.modal}>
+                  <View style={style.modalContent}>
+                    <View style={style.checkbox}>
+                      {
+                        decorations.map((decoration, index) => (
+                          <CheckBox
+                            key={index}
+                            title={decoration.nameDecoration}
+                            checked={checkboxDecorations[index]}
+                            onPress={() => handleCheckboxChangeDecorations(index)}
+                          />
+                        ))
+                      }
+                    </View>
+                    <TouchableOpacity
+                      style={style.closeButton}
+                      onPress={() => setModalDecoracionVisible(false)}
+                    >
+                      <Text style={style.closeButtonText}>Cerrar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+          {/*comentarios*/}
+          <View style={style.inputContainer}>
+            <Text style={style.comentariosTitle}>Comentarios</Text>
+            <Text style={style.error}>{formik.errors.pets}</Text>
+            <View style={style.containerPet}>
+              <TextInput
+                style={style.inputPet}
+                placeholder="Escribe el nombre de tu mascota"
+                value={formik.values.pets}
+                onChangeText={(text) => formik.setFieldValue('pets', text)}
+              />
+            </View>
+            <Text style={style.error}>{formik.errors.comment}</Text>
+            <View style={style.containerPet}>
+              <TextInput
+                style={style.input}
+                placeholder="Escribe tu comentario"
+                value={formik.values.comment}
+                onChangeText={(text) => formik.setFieldValue('comment', text)}
+              />
+            </View>
+            <TouchableOpacity style={style.button} onPress={formik.handleSubmit}>
+              <Text style={style.buttonText}>{isLoading ? 'Enviando...' : 'Enviar'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+        {/* comentarios render */}
+        <View style={style.containerComents}>
+          <Text style={style.titleComents}>Comentarios</Text>
+          {
+            comments.map((item) => (
+              <View style={style.comment} key={item.id}>
+                <Text style={style.author}>{item.author}</Text>
+                <Text style={style.textPet}>Nombre de la mascota: {item.pets}</Text>
+                <Text style={style.text}>{item.comment}</Text>
+                <Text style={style.date}>27/01{item.created_at}</Text>
+              </View>
+            ))
+          }
+        </View>
+      </ScrollView>
+
+    </View>
+
   )
 }
 
 const style = StyleSheet.create({
+  error: {
+    textAlign: 'center',
+    color: '#f00',
+    marginTop: 10
+  },
   container: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -474,11 +469,11 @@ const style = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: 'green',
+    borderColor: '#00bcd4',
     alignItems: 'center',
     justifyContent: 'center',
     margin: 30,
-    backgroundColor: 'green'
+    backgroundColor: '#00bcd4'
   },
   comprar: {
     color: 'white'
@@ -489,7 +484,7 @@ const style = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: {
+  textPrice: {
     fontSize: 30,
     fontWeight: 'bold',
     paddingStart: 25
@@ -514,7 +509,8 @@ const style = StyleSheet.create({
   buttonText: {
     color: 'white',
     paddingStart: 25,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    margin: 10
   },
   modalOverlay: {
     flex: 1,
@@ -607,5 +603,35 @@ const style = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  }, containerComents: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  titleComents: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  comment: {
+    marginBottom: 20,
+  },
+  author: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  }, textPet: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontStyle: 'italic',
+    fontWeight: 'bold'
+  },
+  text: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  date: {
+    fontSize: 14,
+    color: "gray",
   },
 })

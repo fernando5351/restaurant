@@ -11,7 +11,7 @@ export default function Cart() {
   const [shopping, setShopping] = useState([]);
 
   function getShopping() {
-    const id = userToken.id;
+    const id = userToken[0].id;
     axios.get(`${url}/shopping/${id}`)
       .then((res) => {
         setShopping(res.data);
@@ -30,7 +30,6 @@ export default function Cart() {
         getShopping();
       })
       .catch(err => {
-        console.log(err);
         Alert.alert("Error al eliminar el producto.");
       });
   }
@@ -44,11 +43,8 @@ export default function Cart() {
     const data = shopping.map(item => item.id);
     const result = { data };
 
-    console.log(result);
-
     axios.put(`${url}/shopping`, result)
     .then((res)=>{
-      console.log(res.data);
       Alert.alert(res.data.message)
     })
   }
