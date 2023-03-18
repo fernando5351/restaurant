@@ -21,6 +21,7 @@ export const AuthUserContext = ({ children }) => {
                 const token = [];
                 token.push(res.data);
                 setUserToken(token);
+                console.log(userToken);
                 AsyncStorage.setItem('UserToken', JSON.stringify(token));
             })
             .catch((error) => {

@@ -4,15 +4,15 @@ import UserCircle from "../../../assets/icons/profile/usercircle.png";
 import { AuthUser } from '../../context/AuthUserContext'
 
 export default function User() {
-    const { userToken, tokenUser } = useContext(AuthUser);
+    const { userToken } = useContext(AuthUser);
     const user = [];
-    user.push(userToken || tokenUser)
+    user.push(userToken )
 
     return (
         <View style={style.container}>
             {
                 user.map((user) => (
-                    <View style={style.account} key={user.id}>
+                    <View style={style.account} key={user[0].id}>
                         <View style={style.containerImg}>
                             <Image style={style.img} source={UserCircle} />
                         </View>

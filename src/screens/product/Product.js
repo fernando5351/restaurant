@@ -8,7 +8,6 @@ import { useRoute } from '@react-navigation/native';
 import { AuthUser } from "../../context/AuthUserContext";
 import Loader from "../../components/loading/Loading"
 
-
 export default function Products() {
   const route = useRoute();
   const { productId } = route.params;
@@ -38,11 +37,14 @@ export default function Products() {
 
   const url = 'https://storeonline-production.up.railway.app/api/v1';
   function getProducts() {
+    setIsLoading(true);
     axios.get(`${url}/pastel`)
       .then(response => {
         const data = response.data;
         const prod = data.filter((p) => p.id === productId);
         setProduct(prod);
+        setIsLoading(false);
+
       })
       .catch(error => {
         console.error(error);
@@ -130,18 +132,18 @@ export default function Products() {
     }
 
     //colores
-    let idColor1 = null;
-    let idColor2 = null;
+    let idColor1 = 0;
+    let idColor2 = 0;
 
     for (let i = 0; i < checkboxes.length; i++) {
       if (checkboxes[i]) {
-        if (idColor1 === null) {
+        if (idColor1 === 0) {
           idColor1 = colors[i].id;
-        } else if (idColor2 === null) {
+        } else if (idColor2 === 0) {
           idColor2 = colors[i].id;
         }
         selectedColores.push(colors[i]);
-        if (idColor1 !== null && idColor2 !== null) {
+        if (selectedColores) {
           data.push({ idColor1: idColor1, idColor2: idColor2 });
         }
       }
@@ -154,25 +156,15 @@ export default function Products() {
     }
 
     //sabores
-    let idFlavor1 = null;
-    let idFlavor2 = null;
-
     for (let i = 0; i < checkboxSabor.length; i++) {
       if (checkboxSabor[i]) {
-        if (idFlavor1 === null) {
-          idFlavor1 = sabores[i].id;
-        } else if (idFlavor2 === null) {
-          idFlavor2 = sabores[i].id;
-        }
         selectedSabores.push(sabores[i]);
-        if (idFlavor1 !== null && idFlavor2 !== null) {
-          data.push({ idFlavor1: idFlavor1, idFlavor2: idFlavor2 });
-        }
+        data.push({ idFlavor: sabores[i].id });
       }
     }
 
-    if (selectedSabores.length > 2) {
-      Alert.alert('Solo se pueden seleccionar dos sabores como máximo.')
+    if (selectedSabores.length > 1) {
+      Alert.alert('Solo se puede seleccionar uno como máximo.')
       setCheckboxSabor([]);
     }
 
@@ -195,20 +187,16 @@ export default function Products() {
     }, {});
 
     if (selectedSabores.length == 0) {
-      Alert.alert('Debes seleccionar los sabores deseados!.')
-    } if (selectedSabores.length == 1) {
-      Alert.alert('Debes seleccionar dos sabores deseados!.')
+      Alert.alert('¡Debes seleccionar el sabor deseado!.')
     } if (selectedColores.length == 0) {
-      Alert.alert('Debes seleccionar los colores deseados!.')
-    } if (selectedColores.length == 1) {
-      Alert.alert('Debes seleccionar dos colores deseados!.')
+      Alert.alert('¡Debes seleccionar los colores deseados!.')
     } if (selectedDecorations.length == 0) {
-      Alert.alert('Debes seleccionar la decoración deseada!.')
-    } if (selectedColores.length == 2 && selectedDecorations.length == 1 && selectedSabores.length == 2) {
+      Alert.alert('¡Debes seleccionar la decoración deseada!.')
+    } if (selectedColores.length >= 1 && selectedDecorations.length == 1 && selectedSabores.length == 1) {
       axios.post(`${url}/shopping`, cart)
         .then((res) => {
           if (res) {
-            Alert.alert("Pedido realizado con exito!!");
+            Alert.alert("¡Pedido realizado con exito!");
           }
         })
         .catch(error => {
@@ -221,7 +209,7 @@ export default function Products() {
     initialValues: {
       pets: "",
       comment: "",
-      author: userToken.name
+      author: userToken[0].name
     },
     validationSchema: Yup.object(yupSchema),
     validateOnChange: false,
@@ -245,8 +233,8 @@ export default function Products() {
 
   return (
     <View>
+      <Loader visible={isLoading} />
       <ScrollView>
-        <Loader visible={isLoading} />
         <View style={style.container}>
           {
             product.map((item) => (
@@ -337,7 +325,7 @@ export default function Products() {
                     </View>
                     <TouchableOpacity
                       style={style.closeButton}
-                      onPress={() => setModaSaborVisible(false)}
+                      onPress={() => setModalSaborVisible(false)}
                     >
                       <Text style={style.closeButtonText}>Cerrar</Text>
                     </TouchableOpacity>
@@ -418,7 +406,7 @@ export default function Products() {
                 <Text style={style.author}>{item.author}</Text>
                 <Text style={style.textPet}>Nombre de la mascota: {item.pets}</Text>
                 <Text style={style.text}>{item.comment}</Text>
-                <Text style={style.date}>27/01{item.created_at}</Text>
+                <Text style={style.date}>{item.created_at}</Text>
               </View>
             ))
           }

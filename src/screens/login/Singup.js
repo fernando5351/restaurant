@@ -15,7 +15,7 @@ export default function Signup({ navigation }) {
     lastname: Yup.string().required("Los apellidos son obligatorios"),
     direction: Yup.string().required("La direccion es obligatoria"),
     age: Yup.number().min(18, "Solo pueden registrarse personas mayores de edad").required("La edad es obligatoria"),
-    email: Yup.string().email("correo invalido").required("El correro es obligatorio"),
+    email: Yup.string().email("correo invalido, no debe llevar espacios").required("El correro es obligatorio"),
     password: Yup.string().required("La contraseña es obligatoria"),
     cellphone: Yup.string().required("El numero de telefono es necesario")
   };
@@ -38,9 +38,9 @@ export default function Signup({ navigation }) {
 
   return (
     <ScrollView>
+      <Loader visible={isLoading} />
       <StatusBar translucent={false} />
       <View style={styles.container}>
-        <Loader visible={isLoading} />
         <Text style={styles.titulo}>Hola</Text>
         <Text >Crea tu cuenta</Text>
         <Text style={styles.error}>{formik.errors.name}</Text>
@@ -82,7 +82,7 @@ export default function Signup({ navigation }) {
         <TextInput
           placeholder="jhon@email.com"
           style={styles.textInput}
-          value={formik.values.email.trim()}
+          value={formik.values.email}
           onChangeText={(text) => formik.setFieldValue('email', text)}
         />
         <Text style={styles.error}>{formik.errors.password}</Text>
@@ -104,7 +104,7 @@ export default function Signup({ navigation }) {
             <Text style={styles.text}>Registrarse</Text>
           </LinearGradient>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cuentaButton} onPress={()=>navigation.navigate('login')}>
+        <TouchableOpacity style={styles.cuentaButton} onPress={() => navigation.navigate('login')}>
           <Text style={styles.forgotPassword}>Ya tienes cuenta?, Inicia sesion</Text>
         </TouchableOpacity>
       </View>

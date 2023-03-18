@@ -2,13 +2,15 @@ import { StyleSheet, View, Text, ScrollView, Image, Alert, TouchableOpacity } fr
 import React, { useState, useContext } from 'react';
 import { AuthUser } from "../../context/AuthUserContext";
 import axios from "axios";
-import Eliminar from "../../../assets/eliminar.png"
+import Loader from "../../components/loading/Loading"
+import Eliminar from "../../../assets/eliminar.png";
 
 export default function Cart() {
   const { userToken } = useContext(AuthUser);
   const url = "https://storeonline-production.up.railway.app/api/v1/";
 
   const [shopping, setShopping] = useState([]);
+  const [isLoading, setIsLoading] = useState(false)
 
   function getShopping() {
     const id = userToken[0].id;
@@ -24,10 +26,13 @@ export default function Cart() {
   getShopping();
 
   function delProd(id) {
+    setIsLoading(true);
     axios.delete(`${url}/shopping/${id}`)
       .then((res) => {
         Alert.alert(res.data.message);
         getShopping();
+      setIsLoading(false);
+
       })
       .catch(err => {
         Alert.alert("Error al eliminar el producto.");
@@ -40,17 +45,19 @@ export default function Cart() {
   }, 0);
 
   function comprar() {
+    setIsLoading(true);
     const data = shopping.map(item => item.id);
     const result = { data };
-
     axios.put(`${url}/shopping`, result)
     .then((res)=>{
+      setIsLoading(false);
       Alert.alert(res.data.message)
     })
   }
 
   return (
     <View style={styles.container}>
+      <Loader visible={isLoading} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {shopping.map((item, index) => (
           <View style={styles.containerCart} key={index}>

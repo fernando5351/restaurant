@@ -20,7 +20,7 @@ export default function LogOut(props) {
                     onPress={() =>
                         logOut()}
                 >
-                    <Text style={style.text}>LogOut</Text>
+                    <Text style={style.text}>Cerrar sesion</Text>
                 </TouchableOpacity>
             </View>
         </View>

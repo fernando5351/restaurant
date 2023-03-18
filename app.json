@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "restaurant",
-    "slug": "restaurant",
-    "version": "1.0.0",
+    "name": "Pasteleria Delipets",
+    "slug": "PasteleriaDelipets",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logotipo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logotipo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,15 +16,20 @@
     ],
     "ios": {},
     "android": {
-      "package": "com.loricode.restaurant",
-      "versionCode": 1,
+      "package": "com.FernandoDev.PasteleriaDelipets",
+      "versionCode": 2,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logotipo.png",
         "backgroundColor": "#FFFFFF"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logotipo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "db4f1006-e144-44b8-83ea-f1c1aea5fa37"
+      }
     }
   }
 }
