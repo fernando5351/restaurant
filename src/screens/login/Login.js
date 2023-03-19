@@ -66,7 +66,7 @@ export default function Login({ navigation }) {
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('singup')}>
-              <Text style={styles.forgotPassword}>No tienes cuenta?, ¡Registrate!</Text>
+              <Text style={styles.forgotPassword}>¿No tienes cuenta?, ¡Registrate!</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

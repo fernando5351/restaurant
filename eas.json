@@ -14,6 +14,9 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m1-medium"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
@@ -22,13 +25,7 @@
       }
     }
   },
-  "submit": {},
-  "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.loricode.restaurant",
-      "sha256_cert_fingerprints":
-        ["9A:7F:9F:F4:BA:9F:33:EA:FE:98:E9:CD:3C:66:3D:DA:AB:65:CC:2A:44:EE:A0:A7:8A:7D:92:C7:97:E6:5D:12"]
-    }
-
+  "submit": {
+    "production": {}
+  }
 }

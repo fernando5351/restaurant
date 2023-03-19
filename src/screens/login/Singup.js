@@ -105,7 +105,7 @@ export default function Signup({ navigation }) {
           </LinearGradient>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cuentaButton} onPress={() => navigation.navigate('login')}>
-          <Text style={styles.forgotPassword}>Ya tienes cuenta?, Inicia sesion</Text>
+          <Text style={styles.forgotPassword}>¿Ya tienes cuenta?, Inicia sesion</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -167,6 +167,6 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   cuentaButton: {
-    margin: 10
+    margin: 25
   }
 })
